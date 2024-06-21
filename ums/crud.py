@@ -150,9 +150,7 @@ class UserCrud:
         """
         user = self.__get_user(by=by, user_id=user_id, db=db)
 
-        if schema.password is None:
-            schema.password = user.password
-        return user.update(**schema.model_dump(), db=db)
+        return user.update(**schema.model_dump(exclude_unset=True), db=db)
 
     def delete(self, *, db: Session, user_id: str, by: str) -> models.User:
         """
