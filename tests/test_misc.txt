@@ -1,0 +1,40 @@
+Let's test to ensure an error is raised when a bad username is given from the
+API
+>>> from ums.schemas import UserBase
+>>> UserBase.username_must_not_be_numeric("john_doe")
+'john_doe'
+>>> UserBase.username_must_not_be_numeric("12345")
+Traceback (most recent call last):
+...
+ValueError: username cannot be just numbers
+
+
+Let's validate the __str__ method of the User model
+>>> from ums.models import User
+>>> user  = User(username="joe", password="password")
+>>> print(user)
+joe
+>>> user.__str__()  # redundant, but just in case
+'joe'
+
+
+Now let's test the DBSession object to ensure it's a valid SQLAlchemy session
+object.
+
+>>> from ums.database import get_db
+>>> from sqlalchemy.orm import Session
+>>> db = get_db()
+>>> assert type(db).__name__ == "generator"
+>>> assert isinstance(next(db), Session)
+>>> db.close()
+
+
+Let's test that final exception that should be raised if we don't provided the
+right value for the `by` parameter
+
+>>> from ums.crud import crud_user
+>>> from fastapi import HTTPException
+>>> crud_user._UserCrud__get_user(by="invalid", user_id="joe", db=db)
+Traceback (most recent call last):
+...
+fastapi.exceptions.HTTPException: 500: {'message': 'An error while performing this action', 'next_steps': 'If the error persists, please contact the system administrator.'}
