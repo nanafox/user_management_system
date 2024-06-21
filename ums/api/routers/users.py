@@ -1,4 +1,6 @@
-from fastapi import APIRouter, status
+from typing import Optional
+
+from fastapi import APIRouter, Query, status
 
 from ums import schemas
 from ums.api.deps import (
@@ -8,18 +10,27 @@ from ums.api.deps import (
 )
 from ums.crud import crud_user
 
+
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post(
     "",
     response_model=schemas.UserResponse,
-    response_description="User created successfully",
     summary="Create a user",
     status_code=status.HTTP_201_CREATED,
+    responses={
+        **schemas.user_created_response,
+        **schemas.unprocessable_entity,
+    },
+    operation_id="create_user",
 )
 async def create_user(db: DBSessionDependency, user: schemas.UserCreate):
-    """Create a new user."""
+    """
+    This API endpoint is responsible for creating a new user within the
+    system. It accepts user data in the request body, i.e., `username` and
+    `password`, and any additional profile information.
+    """
     user_obj = crud_user.create(db=db, schema=user)
     return {
         "message": "User created successfully",
@@ -31,14 +42,19 @@ async def create_user(db: DBSessionDependency, user: schemas.UserCreate):
 @router.get(
     "/{user_id}",
     response_model=schemas.UserResponse,
-    response_description="User retrieved successfully",
     summary="Retrieve a user by their id",
+    responses={**schemas.user_retrieved_response, **schemas.user_not_found},
+    operation_id="get_user_by_id",
 )
 async def get_user_by_id(
     db: DBSessionDependency,
     user_id: str = UserIdDependency,
 ):
-    """Retrieve a user by their id."""
+    """
+    This API endpoint retrieves a user from the system based on their unique
+    user ID. It is designed to provide detailed user information by querying
+    the database with the specified user ID.
+    """
     user_obj = crud_user.get_by_id(db=db, user_id=user_id)
     return {
         "message": "User created successfully",
@@ -50,12 +66,15 @@ async def get_user_by_id(
 @router.get(
     "",
     response_model=schemas.UserResponse,
-    response_description="User data retrieved successfully",
     summary="Retrieve all users or a user by their username",
+    responses={**schemas.users_retrieved_response, **schemas.user_not_found},
+    operation_id="get_users",
 )
 async def get_users(
     db: DBSessionDependency,
-    username: str = UsernameDependency,
+    username: Optional[str] = Query(
+        None, description="The username of the user"
+    ),
     skip: int = 0,
     limit: int = 25,
 ):
@@ -85,13 +104,28 @@ async def get_users(
     response_model=schemas.UserResponse,
     response_description="User updated successfully",
     summary="Update a user by their id",
+    responses={
+        **schemas.user_updated_response,
+        **schemas.user_not_found,
+        **schemas.unprocessable_entity,
+    },
+    operation_id="update_user_by_id",
 )
 async def update_user_by_id(
     db: DBSessionDependency,
     user: schemas.UserUpdate,
     user_id: str = UserIdDependency,
 ):
-    """Update a user by their id."""
+    """
+    This endpoint updates a user by their id. The user id is a unique
+    identifier for each user in the system. Pass the ID of the user you want
+    to update and the new data you want to update the user with.
+
+    For convenience, you can omit the `password` field if you don't want to
+    update the user's password. You can simply pass the `username` field only
+    and send the request. If do want to update the password, you can pass the
+    `password` field along with the `username` field.
+    """
     updated_user = crud_user.update(
         db=db, user_id=user_id, schema=user, by="id"
     )
@@ -107,13 +141,28 @@ async def update_user_by_id(
     response_model=schemas.UserResponse,
     response_description="User updated successfully",
     summary="Update a user by their username",
+    responses={
+        **schemas.user_updated_response,
+        **schemas.user_not_found,
+        **schemas.unprocessable_entity,
+    },
+    operation_id="update_user_by_username",
 )
 async def update_user_by_username(
     db: DBSessionDependency,
     user: schemas.UserUpdate,
     username: str = UsernameDependency,
 ):
-    """Update a user by their username."""
+    """
+    This endpoint updates a user by their username. The user username is a
+    unique identifier for each user in the system. Pass the ID of the user you
+    want to update and the new data you want to update the user with.
+
+    For convenience, you can omit the `password` field if you don't want to
+    update the user's password. You can simply pass the `username` field only
+    and send the request. If do want to update the password, you can pass the
+    `password` field along with the `username` field.
+    """
     updated_user = crud_user.update(
         db=db, user_id=username, schema=user, by="username"
     )
@@ -129,12 +178,18 @@ async def update_user_by_username(
     status_code=status.HTTP_204_NO_CONTENT,
     response_description="User deleted successfully",
     summary="Delete a user by their id",
+    responses={**schemas.user_not_found},
+    operation_id="delete_user_by_id",
 )
 async def delete_user_by_id(
     db: DBSessionDependency, user_id: str = UserIdDependency
 ):
-    """Delete a user by their id."""
-    return crud_user.delete(user_id=user_id, db=db, by="id")
+    """
+    This endpoint deletes a user by their id. This is a destructive operation
+    and cannot be undone. Please be sure you want to delete the user before
+    sending the request.
+    """
+    crud_user.delete(user_id=user_id, db=db, by="id")
 
 
 @router.delete(
@@ -142,9 +197,17 @@ async def delete_user_by_id(
     status_code=status.HTTP_204_NO_CONTENT,
     response_description="User deleted successfully",
     summary="Delete a user by their username",
+    responses={
+        **schemas.user_not_found,
+    },
+    operation_id="delete_user_by_username",
 )
 async def delete_user_by_username(
     db: DBSessionDependency, username: str = UsernameDependency
 ):
-    """Delete a user by their username."""
-    return crud_user.delete(user_id=username, db=db, by="username")
+    """
+    This endpoint deletes a user by their username. This is a destructive
+    operation and cannot be undone. Please be sure you want to delete the user
+    before sending the request.
+    """
+    crud_user.delete(user_id=username, db=db, by="username")
