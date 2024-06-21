@@ -7,5 +7,5 @@ from sqlalchemy.orm import Session
 
 DBSessionDependency = Annotated[Session, Depends(get_db)]
 
-UsernameDependency = Query(None, description="The username of the user")
+UsernameDependency = Query(..., description="The username of the user")
 UserIdDependency = Path(..., description="The ID of the user")
