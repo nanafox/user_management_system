@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     dev: bool = False
     minimum_password_length: int = 8
     maximum_password_length: int = 15
+    prod_url: str | None = "http://localhost:8000"
 
     model_config = ConfigDict(env_file=".env")
 

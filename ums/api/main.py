@@ -3,12 +3,22 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from ums import schemas
 from ums.api.routers import users
+from ums.config import settings
+
+if settings.dev:
+    servers = {
+        "url": "http://localhost:8000",
+        "description": "Local development server",
+    }
+else:
+    servers = {"url": settings.prod_url, "description": "Production server"}
 
 description = """
 This User Management System provides basic functionality to manage users
 through REST APIs, allowing users to be retrieved by ID or all users to be
 listed. Users can also be created, updated, and deleted.
 """
+
 
 app = FastAPI(
     title="User Management System REST APIs",
@@ -23,6 +33,13 @@ app = FastAPI(
             "description": "An endpoint to check the status of the API",
         },
     ],
+    contact={
+        "name": "Maxwell Nana Forson",
+        "url": "https://linktr.ee/theLazyProgrammer",
+        "email": "nanaforsonjnr@gmail.com",
+    },
+    version="v1.0",
+    servers=[servers],
 )
 
 
