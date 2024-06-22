@@ -196,7 +196,7 @@ class UserUpdate(UserBase):
 
     model_config = ConfigDict(
         json_schema_extra={
-            "examples": [{"username": "joe_", "password": "new_password"}]
+            "examples": [{"username": "jdoe_", "password": "new_password"}]
         }
     )
 
