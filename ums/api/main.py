@@ -1,5 +1,6 @@
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 
 from ums import schemas
 from ums.api.routers import users
@@ -24,8 +25,8 @@ app = FastAPI(
     title="User Management System REST APIs",
     summary="A simple User Management System",
     description=description,
-    docs_url="/api/",
-    redoc_url="/api/docs",
+    docs_url="/api" if settings.dev else None,
+    redoc_url="/api/docs" if settings.dev else None,
     openapi_tags=[
         {"name": "Users", "description": "Operations related to users"},
         {
@@ -66,6 +67,15 @@ router = APIRouter(prefix="/api")
 async def get_api_status():
     """Returns OK if the API is up and running"""
     return {"status": "OK"}
+
+
+@router.get("/docs")
+async def redirect_to_docs():
+    """Redirects to the Postman API documentation page when in production."""
+    return RedirectResponse(
+        url="https://documenter.getpostman.com/view/14404907/2sA3XWbxxa",
+        status_code=status.HTTP_301_MOVED_PERMANENTLY,
+    )
 
 
 router.include_router(users.router)
