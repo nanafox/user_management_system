@@ -10,7 +10,6 @@ from ums.api.deps import (
 )
 from ums.crud import crud_user
 
-
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
@@ -57,8 +56,8 @@ async def get_user_by_id(
     """
     user_obj = crud_user.get_by_id(db=db, user_id=user_id)
     return {
-        "message": "User created successfully",
-        "status_code": status.HTTP_201_CREATED,
+        "message": "User data retrieval successful",
+        "status_code": status.HTTP_200_OK,
         "data": user_obj,
     }
 
