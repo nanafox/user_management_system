@@ -11,4 +11,4 @@ psql -U postgres -c "CREATE DATABASE ${DB_NAME} OWNER $DB_USER;"
 # grant permissions to the user
 psql -U postgres -c "GRANT ALL PRIVILEGES ON DATABASE ${DB_NAME} TO $DB_USER;"
 
-echo "User '$DB_USER' and Database ${DB_NAME}_test created successfully for testing."
+echo "User $DB_USER and Database ${DB_NAME} created successfully for testing."
